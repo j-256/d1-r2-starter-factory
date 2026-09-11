@@ -23,7 +23,7 @@
     "@types/node": "22.20.1",
     "drizzle-kit": "0.31.10",
     "typescript": "5.9.3",
-    "wrangler": "4.127.1"
+    "wrangler": "4.131.0"
   },
   "overrides": {
     "esbuild": "0.28.2"
