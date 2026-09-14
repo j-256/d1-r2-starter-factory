@@ -89,6 +89,10 @@ Factory releases use Semantic Versioning independently of downstream template pu
 
 Use `npm version` as the only release entrypoint. To publish the version already declared in `package.json`, run `npm version "$(node -p 'require("./package.json").version')" --allow-same-version`; later releases use `npm version <major|minor|patch>`. Both forms run the clean-main and remote-synchronization guard, repeat the complete release gate, create the version commit and tag, and push both refs atomically. The tag-triggered GitHub Actions workflow verifies the exact tagged factory and creates the published GitHub Release; an explicit workflow dispatch can safely retry an existing tag.
 
+## Project cover automation
+
+The factory cover captures the actual document-library interface with synthetic API responses through a local preview. Capture tooling and its workflow are excluded from the generated templates. Install the capture tooling with `npm ci --prefix tools/cover` and `npm exec --prefix tools/cover -- playwright install chromium`, then run `npm run capture:cover`. Use `-- --output FILE` to write a review image elsewhere. CI captures during source verification and retains the image as an artifact. Successful main builds publish a changed `docs/screenshots/cover.png` with an image-only commit; pull requests render without publishing, and superseded revisions skip publication.
+
 ## License
 
 MIT. See [`LICENSE`](LICENSE).

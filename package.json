@@ -26,7 +26,8 @@
     "generate": "node scripts/generate.mjs",
     "test:generate": "node --test scripts/generate.test.mjs scripts/publish-template.test.mjs scripts/template-backups.test.mjs",
     "template:backups": "node scripts/template-backups.mjs",
-    "template:publish": "node scripts/publish-template.mjs"
+    "template:publish": "node scripts/publish-template.mjs",
+    "capture:cover": "node tools/cover/capture.mjs"
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

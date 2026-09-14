@@ -32,6 +32,7 @@ export const OPENAI_DROP = [
     "node_modules",
     "dist",
     "variants",
+    "tools",
     ".vinext",
     ".wrangler",
     ".sites-runtime",
@@ -67,6 +68,7 @@ export const OPENAI_DROP_FILES = [
     ...FACTORY_GUIDANCE_FILES,
     ...GENERATED_FORBIDDEN_FILES,
     "docs/PUBLISH.md",
+    ".github/workflows/cover.yml",
 ];
 
 // Only these package commands belong in the emitted OpenAI template
