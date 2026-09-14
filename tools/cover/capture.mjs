@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
+import { stripVTControlCharacters } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
 import { capture, outputPath } from './browser.mjs';
 
@@ -15,7 +16,7 @@ const env = { ...process.env, WRANGLER_SEND_METRICS: 'false', WRANGLER_WRITE_LOG
 for (const key of Object.keys(env)) if (/TOKEN|SECRET|PASSWORD|CLOUDFLARE|API_KEY/.test(key)) delete env[key];
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', '0'], { cwd: root, env, stdio: ['ignore', 'pipe', 'pipe'] });
 let log = '';
-const collect = data => { log = (log + data.toString()).slice(-100_000); };
+const collect = data => { log = (log + stripVTControlCharacters(data.toString())).slice(-100_000); };
 server.stdout.on('data', collect); server.stderr.on('data', collect);
 try {
   const deadline = Date.now() + 90_000;
