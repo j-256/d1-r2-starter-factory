@@ -18,7 +18,7 @@ Both editions contain the same document-library vertical slice: upload binary fi
 The generated repositories are intentionally simple starting points. The machinery that keeps them synchronized lives here:
 
 - **Explicit variant generation.** Shared feature code is combined with runtime-owned presentation and overlays, then scanned for framework residue and factory-only files.
-- **Generated-tree verification.** Each emitted edition runs its shared tests in place, the Wrangler edition installs its pinned dependencies and typechecks with its emitted toolchain, and the Sites artifact is checked for its Worker entry point, hosting manifest, and packaged migration history.
+- **Generated-tree verification.** Each emitted edition runs its shared tests in place, the Wrangler edition installs its pinned dependencies and typechecks with its emitted toolchain, and the Sites artifact is loaded in the Workers runtime to validate its fetch entry point, hosting manifest, and packaged migration history.
 - **Checkpoint replay.** Each template records its own verified factory cursor. Publication regenerates intervening factory commits and retains only checkpoints that change that edition.
 - **Guarded publication.** Planned trees and complete diffs are reviewed before each template receives one remote push. Fresh-history replacement uses an exact lease and a verified bare recovery mirror.
 - **Independent downstream validation.** CI and security scanning run in the factory and in each generated repository so output-specific defects remain visible.

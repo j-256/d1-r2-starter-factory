@@ -35,8 +35,9 @@ for migration in "${required_migrations[@]}"; do
 done
 
 node --input-type=module - "${worker}" "${hosting}" <<'NODE'
-import { readFile } from "node:fs/promises";
-import { pathToFileURL } from "node:url";
+import { readFile, readdir } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { Miniflare } from "miniflare";
 
 const OBSOLETE_PROJECT_ID = "REPLACE_WITH_YOUR_SITES_PROJECT_ID";
 const [workerPath, hostingPath] = process.argv.slice(2);
@@ -47,11 +48,45 @@ if (hosting.project_id === OBSOLETE_PROJECT_ID) {
   );
 }
 
-const workerUrl = pathToFileURL(workerPath);
-workerUrl.searchParams.set("sites-validation", `${process.pid}-${Date.now()}`);
-const worker = await import(workerUrl.href);
-if (!worker.default || typeof worker.default.fetch !== "function") {
-  throw new Error("dist/server/index.js must have an ESM default export with fetch(request, env, ctx)");
+const VALIDATION_MODULE = "__sites_artifact_validation__.mjs";
+const COMPATIBILITY_DATE = "2026-09-21";
+const workerRoot = dirname(workerPath);
+const modules = {
+  [VALIDATION_MODULE]: {
+    type: "esm",
+    contents: `import worker from "./index.js";
+export default {
+  fetch() {
+    if (!worker || typeof worker.fetch !== "function") {
+      throw new Error("dist/server/index.js must have an ESM default export with fetch(request, env, ctx)");
+    }
+    return new Response(null, { status: 204 });
+  }
+};`,
+  },
+};
+for (const file of await readdir(workerRoot, { recursive: true })) {
+  if (file.endsWith(".js")) {
+    modules[file] = { type: "esm", contents: await readFile(resolve(workerRoot, file), "utf8") };
+  }
+}
+const runtime = new Miniflare({
+  workers: [{
+    config: {
+      name: "sites-artifact-validation",
+      compatibilityDate: COMPATIBILITY_DATE,
+      compatibilityFlags: ["nodejs_compat"],
+      manifest: { mainModule: VALIDATION_MODULE, modules },
+    },
+  }],
+});
+try {
+  const response = await runtime.dispatchFetch("http://localhost/");
+  if (response.status !== 204) {
+    throw new Error("dist/server/index.js must have an ESM default export with fetch(request, env, ctx)");
+  }
+} finally {
+  await runtime.dispose();
 }
 NODE
 
