@@ -44,12 +44,12 @@ const ROOT_INSTALL_SCRIPT_APPROVALS = Object.freeze({
     "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
     "unrs-resolver@1.11.1": true,
-    "workerd@1.20260910.1": true,
+    "workerd@1.20260921.1": true,
 });
 const WRANGLER_INSTALL_SCRIPT_APPROVALS = Object.freeze({
     "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
-    "workerd@1.20260910.1": true,
+    "workerd@1.20260921.1": true,
 });
 const REQUIRED_SITE_MIGRATIONS = Object.freeze([
     "0000_create-documents.sql",
@@ -516,6 +516,31 @@ test("validate-artifact accepts the complete packaged migration history", () => 
     try {
         writeArtifactFixture(root);
         assert.match(runArtifactValidator(root), /migration history/);
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("validate-artifact loads Workers runtime imports", () => {
+    const root = tempTree();
+    try {
+        writeArtifactFixture(root);
+        writeFileSync(
+            join(root, "dist", "server", "index.js"),
+            'import { WorkerEntrypoint } from "cloudflare:workers";\nexport default { fetch() { return WorkerEntrypoint; } };\n'
+        );
+        assert.match(runArtifactValidator(root), /migration history/);
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("validate-artifact rejects a Worker without fetch", () => {
+    const root = tempTree();
+    try {
+        writeArtifactFixture(root);
+        writeFileSync(join(root, "dist", "server", "index.js"), "export default {};\n");
+        assert.throws(() => runArtifactValidator(root), /must have an ESM default export with fetch/);
     } finally {
         rmSync(root, { recursive: true, force: true });
     }
