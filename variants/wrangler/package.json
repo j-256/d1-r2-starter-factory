@@ -16,14 +16,14 @@
   },
   "dependencies": {
     "drizzle-orm": "0.45.3",
-    "hono": "4.13.8"
+    "hono": "4.13.11"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20260923.1",
+    "@cloudflare/workers-types": "5.20261005.1",
     "@types/node": "22.20.4",
     "drizzle-kit": "0.31.11",
     "typescript": "5.9.3",
-    "wrangler": "4.137.0"
+    "wrangler": "4.146.0"
   },
   "overrides": {
     "esbuild": "0.28.2"
@@ -31,6 +31,6 @@
   "allowScripts": {
     "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
-    "workerd@1.20260921.1": true
+    "workerd@1.20261001.1": true
   }
 }

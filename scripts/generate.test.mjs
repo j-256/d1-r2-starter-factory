@@ -44,12 +44,12 @@ const ROOT_INSTALL_SCRIPT_APPROVALS = Object.freeze({
     "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
     "unrs-resolver@1.11.1": true,
-    "workerd@1.20260921.1": true,
+    "workerd@1.20261001.1": true,
 });
 const WRANGLER_INSTALL_SCRIPT_APPROVALS = Object.freeze({
     "esbuild@0.28.2": true,
     "fsevents@2.3.3": true,
-    "workerd@1.20260921.1": true,
+    "workerd@1.20261001.1": true,
 });
 const REQUIRED_SITE_MIGRATIONS = Object.freeze([
     "0000_create-documents.sql",
