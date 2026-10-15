@@ -1740,6 +1740,51 @@ test("append replay refuses a baseline that does not match remote main", async (
     );
 });
 
+test("append replay checks every baseline before publishing either template", async () => {
+    const fake = fakeDependencies({
+        changedPathSequenceByRepository: {
+            [OPENAI_REPOSITORY]: [
+                ["README.md"],
+                [],
+                ["openai.ts"],
+                [],
+            ],
+            [WRANGLER_REPOSITORY]: [
+                ["README.md"],
+                ["package.json"],
+            ],
+        },
+        exists: true,
+        replay: {
+            base: { revision: "baseline" },
+            checkpoints: [{ message: "Add feature", revision: "feature" }],
+            tempRoot: "replay-temp",
+        },
+    });
+
+    await assert.rejects(
+        publishTemplates(
+            {
+                help: false,
+                history: "append",
+                replayFrom: "baseline",
+                variant: "all",
+                yes: true,
+            },
+            fake.dependencies
+        ),
+        /j-256\/d1-r2-starter-wrangler: append replay baseline does not match remote main/
+    );
+    assert.equal(
+        fake.operations.some((operation) => operation.startsWith("push")),
+        false
+    );
+    assert.equal(
+        fake.operations.some((operation) => operation.startsWith("recordFactoryRevision:")),
+        false
+    );
+});
+
 test("fresh replay creates a baseline root before curated checkpoints", async () => {
     const fake = fakeDependencies({
         changedPathSequenceByRepository: {

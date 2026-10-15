@@ -1007,6 +1007,23 @@ export async function publishTemplates(options, dependencies) {
             }
         }
 
+        const publishPlans = plans.filter(
+            ({ requiresPublication }) => requiresPublication
+        );
+
+        // Prepare every replay before writing any template or factory cursor
+        for (const plan of publishPlans) {
+            if (!plan.replay) continue;
+            plan.history = await historyModeFor(plan, options, dependencies);
+            await assertFreshBackupAvailable(plan, plan.history, dependencies);
+            plan.preparedReplay = await materializeReplayCommits(
+                plan,
+                plan.replay,
+                plan.history,
+                dependencies
+            );
+        }
+
         const results = [];
         for (const plan of plans.filter(
             ({ requiresPublication }) => !requiresPublication
@@ -1024,9 +1041,6 @@ export async function publishTemplates(options, dependencies) {
                 variant: plan.variant,
             });
         }
-        const publishPlans = plans.filter(
-            ({ requiresPublication }) => requiresPublication
-        );
 
         if (publishPlans.length > 0) {
             logPhase(dependencies, "Publish templates");
@@ -1051,24 +1065,21 @@ export async function publishTemplates(options, dependencies) {
                     );
                 }
             }
-            const history = await historyModeFor(
+            const history = plan.history ?? await historyModeFor(
                 plan,
                 options,
                 dependencies
             );
             const action = publicationAction(plan, history);
             if (history) dependencies.log(`History mode: ${history}`);
-            await assertFreshBackupAvailable(plan, history, dependencies);
+            if (!replay) {
+                await assertFreshBackupAvailable(plan, history, dependencies);
+            }
             let commit;
             let commitCount;
             let commitMessage;
             if (replay) {
-                ({ commit, commitCount } = await materializeReplayCommits(
-                    plan,
-                    replay,
-                    history,
-                    dependencies
-                ));
+                ({ commit, commitCount } = plan.preparedReplay);
                 if (commitCount === 0) {
                     dependencies.log(
                         `${plan.variant}: downstream policy verified`
