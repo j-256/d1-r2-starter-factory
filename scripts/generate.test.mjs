@@ -246,6 +246,23 @@ test("scanForResidue rejects factory Dependabot configuration", () => {
     }
 });
 
+test("scanForResidue rejects the factory publication workflow", () => {
+    const root = tempTree();
+    try {
+        const workflowPath = join(root, ".github", "workflows", "publish-templates.yml");
+        mkdirSync(dirname(workflowPath), { recursive: true });
+        writeFileSync(workflowPath, "name: Publish templates\n");
+        assert.equal(
+            scanForResidue(root).some((violation) =>
+                violation.includes(".github/workflows/publish-templates.yml")
+            ),
+            true
+        );
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test("copyGeneratedPath excludes dependencies, Git, and macOS metadata", () => {
     const root = tempTree();
     try {
@@ -409,7 +426,7 @@ test("emitOpenai allowlists runtime scripts and package commands", () => {
     }
 });
 
-test("emitOpenai keeps generated CI and drops factory Dependabot", () => {
+test("emitOpenai keeps generated CI and drops factory publication controls", () => {
     const root = tempTree();
     try {
         const source = join(root, "source");
@@ -423,6 +440,10 @@ test("emitOpenai keeps generated CI and drops factory Dependabot", () => {
             "name: CI\n"
         );
         writeFileSync(
+            join(source, ".github", "workflows", "publish-templates.yml"),
+            "name: Publish templates\n"
+        );
+        writeFileSync(
             join(source, ".github", "dependabot.yml"),
             "version: 2\n"
         );
@@ -434,6 +455,12 @@ test("emitOpenai keeps generated CI and drops factory Dependabot", () => {
         assert.equal(
             existsSync(join(output, ".github", "workflows", "ci.yml")),
             true
+        );
+        assert.equal(
+            existsSync(
+                join(output, ".github", "workflows", "publish-templates.yml")
+            ),
+            false
         );
         assert.equal(
             existsSync(

@@ -60,8 +60,10 @@ export const FACTORY_GUIDANCE_FILES = Object.freeze([
 ]);
 
 export const FACTORY_DEPENDABOT_CONFIG_PATH = ".github/dependabot.yml";
+const FACTORY_PUBLICATION_WORKFLOW_PATH = ".github/workflows/publish-templates.yml";
 export const GENERATED_FORBIDDEN_FILES = Object.freeze([
     FACTORY_DEPENDABOT_CONFIG_PATH,
+    FACTORY_PUBLICATION_WORKFLOW_PATH,
 ]);
 
 export const OPENAI_DROP_FILES = [
