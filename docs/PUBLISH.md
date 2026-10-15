@@ -16,6 +16,14 @@ The generated-tree guards reject `.github/dependabot.yml` in either edition. Bef
 
 The short version: use replay to preserve factory commit boundaries in template history; omit replay to publish one net snapshot commit per changed template.
 
+## Automatic publication
+
+The [Publish templates workflow](../.github/workflows/publish-templates.yml) runs after a successful main Project cover workflow, which includes the factory release check. It checks out the latest factory `main`, repeats `npm run release:check` for that exact commit, then runs `npm run template:publish -- all --history append --replay --yes`. A scheduled run catches factory updates missed by earlier runs, and `workflow_dispatch` supports a manual retry. The workflow is serialized so concurrent factory updates cannot publish both templates at once. A failed run remains visible in Actions; no fallback skips the publisher's baseline, policy, remote, or cursor checks.
+
+The workflow needs a dedicated `TEMPLATE_PUBLISH_TOKEN` repository secret on this factory. Use a fine-grained GitHub token limited to this factory and the two generated template repositories, with repository Contents write access for template pushes, Variables write access for the factory cursors, and Administration read access for the downstream Dependabot policy checks. Store the token in the factory's Actions secrets, never in source or logs. The workflow keeps that token out of dependency installation and the release gate, and supplies it only to the publisher step. An absent, expired, or insufficient token fails the run visibly; do not substitute the maintainer's broad local `gh` token.
+
+The publisher prepares every selected replay and proves each append baseline matches its remote before changing either template or a factory cursor. A remote change after that preflight can still reject a push; retry the workflow after reconciling the new remote state. Keep security fixes and dependency updates in the factory. A direct edit to a generated template can block replay and needs an explicit one-time snapshot append or another reviewed recovery; the automatic workflow never changes history mode or force-pushes to work around it.
+
 ## How publication works
 
 From a clean `main` branch, the bare command uses the normal checkpoint-preserving workflow for both templates:

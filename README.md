@@ -73,7 +73,7 @@ The generator creates ignored `dist/openai/` and `dist/wrangler/` trees. It remo
 
 ## Publish templates
 
-Template publication is a guarded maintainer workflow, not a normal development command. Read [the publishing runbook](docs/PUBLISH.md) before using it.
+Template publication uses the guarded maintainer workflow described in [the publishing runbook](docs/PUBLISH.md). A successful main Project cover run starts the publisher, and a scheduled run catches factory updates missed by earlier runs. The workflow requires the factory's `TEMPLATE_PUBLISH_TOKEN` Actions secret to write both template repositories and the factory-owned publication cursors.
 
 The default command preserves relevant factory checkpoints in both downstream histories:
 
@@ -81,7 +81,7 @@ The default command preserves relevant factory checkpoints in both downstream hi
 npm run template:publish
 ```
 
-It requires a clean `main` whose commit matches `origin/main`, shows every downstream diff, asks for publication approval, verifies the resulting remote commits, template settings, and downstream Dependabot policy, and only then advances each factory-owned cursor.
+It requires a clean `main` whose commit matches `origin/main`, shows every downstream diff, verifies the resulting remote commits, template settings, and downstream Dependabot policy, and only then advances each factory-owned cursor. Interactive runs ask for publication approval; the workflow uses the approved append replay mode without prompts.
 
 ## Releases
 
