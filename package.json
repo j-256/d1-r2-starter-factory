@@ -36,7 +36,7 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "1.70.0",
+    "@cloudflare/vite-plugin": "1.70.1",
     "@tailwindcss/postcss": "4.3.5",
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
@@ -52,7 +52,7 @@
     "typescript": "5.9.3",
     "vinext": "1.4.6",
     "vite": "8.3.8",
-    "wrangler": "4.164.0"
+    "wrangler": "4.168.0"
   },
   "overrides": {
     "brace-expansion@<1.1.21": "1.1.21",
